@@ -2,7 +2,7 @@ name: Sample Workflow
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main526 ] # it is just for testing purpose
 
 jobs:
   test:
