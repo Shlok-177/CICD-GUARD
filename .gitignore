@@ -1,0 +1,72 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go specific
+*.o
+*.a
+*.log
+
+# cicd-guard binary
+cicd-guard
+cicd-guard.exe
+
+# Go workspace file
+go.work
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Log files
+*.log
+logs/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Test coverage
+coverage.txt
+coverage.html
+
+# Build directories
+dist/
+build/
+bin/
+
+# Dependency directories (if using vendoring)
+vendor/
+
+# Air live reload (if using for development)
+tmp/
+
+# Local configuration files
+config.local.yml
+config.local.yaml
