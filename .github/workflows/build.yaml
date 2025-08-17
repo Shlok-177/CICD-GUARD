@@ -76,6 +76,7 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
           CGO_ENABLED: 0
+        shell: bash
         run: |
           echo "Building for ${{ matrix.goos }}/${{ matrix.goarch }}"
           go build -ldflags="-s -w" -o ${{ matrix.binary_name }} .
@@ -86,6 +87,7 @@ jobs:
           fi
 
       - name: Create archive
+        shell: bash
         run: |
           if [[ "${{ matrix.goos }}" == "windows" ]]; then
             # Create ZIP for Windows
@@ -145,7 +147,7 @@ jobs:
           echo "🚀 Build Complete! Download your binaries:"
           echo "=========================================="
           echo ""
-          echo "�� Combined package (all platforms):"
+          echo " Combined package (all platforms):"
           echo "   cicd-guard-all-platforms.zip"
           echo ""
           echo "🖥️  Individual packages:"
