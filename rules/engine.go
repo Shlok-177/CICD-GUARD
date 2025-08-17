@@ -66,21 +66,9 @@ func (e *Engine) RunRules(filePath, content string) []types.Finding {
 		lineNum++
 		line := scanner.Text()
 
-		// Run builtin rules
-		for _, rule := range e.rules {
-			if rule.Pattern.MatchString(line) {
-				ruleFindings := rule.Check(content, lineNum, line)
-				for i := range ruleFindings {
-					ruleFindings[i].File = filePath
-					ruleFindings[i].Line = lineNum
-					ruleFindings[i].Rule = rule.Name
-					ruleFindings[i].RuleID = rule.RuleID
-				}
-				findings = append(findings, ruleFindings...)
-			}
-		}
+		customRuleMatched := false
 
-		// Run custom rules
+		// Run custom rules FIRST (they take priority)
 		for _, customRule := range e.customRules {
 			pattern, err := regexp.Compile(customRule.Pattern)
 			if err != nil {
@@ -98,6 +86,24 @@ func (e *Engine) RunRules(filePath, content string) []types.Finding {
 					Context:  strings.TrimSpace(line),
 				}
 				findings = append(findings, finding)
+				customRuleMatched = true
+				break // Only use the first matching custom rule
+			}
+		}
+
+		// Run builtin rules only if no custom rule matched
+		if !customRuleMatched {
+			for _, rule := range e.rules {
+				if rule.Pattern.MatchString(line) {
+					ruleFindings := rule.Check(content, lineNum, line)
+					for i := range ruleFindings {
+						ruleFindings[i].File = filePath
+						ruleFindings[i].Line = lineNum
+						ruleFindings[i].Rule = rule.Name
+						ruleFindings[i].RuleID = rule.RuleID
+					}
+					findings = append(findings, ruleFindings...)
+				}
 			}
 		}
 	}

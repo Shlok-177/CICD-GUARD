@@ -3,9 +3,9 @@
 # Use --rules flag to specify a custom rules file: cicd-guard scan --rules ./custom-rules.yml
 
 rules:
-  # Custom API Key Detection
+  # Custom API Key Detection - matches SECRET_KEY, API_TOKEN patterns
   - id: CUSTOM_API_KEY
-    pattern: "api_key=[A-Za-z0-9]{32}"
+    pattern: "(SECRET_KEY|API_TOKEN)=[A-Za-z0-9_]{20,}"
     severity: HIGH
     message: "Hardcoded API key detected"
     description: "Detects hardcoded API keys in various formats"
