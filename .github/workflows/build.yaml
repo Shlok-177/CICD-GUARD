@@ -17,11 +17,10 @@ jobs:
         include:
           # Windows
           - os: windows-latest
-            arch: amd64
             goos: windows
             goarch: amd64
-            binary_name: cicd-guard-windows-amd64.exe
-            archive_name: cicd-guard-windows-amd64.zip
+            binary_name: cicd-guard-windows.exe
+            archive_name: cicd-guard-windows.zip
             
           # Linux AMD64
           - os: ubuntu-latest
@@ -102,61 +101,4 @@ jobs:
         with:
           name: ${{ matrix.archive_name }}
           path: ${{ matrix.archive_name }}
-          retention-days: 30
-
-  # Job to download all artifacts and create a combined package
-  package:
-    name: Package All Binaries
-    needs: build
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Download all build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: dist/
-
-      - name: List downloaded files
-        run: ls -la dist/
-
-      - name: Create combined package
-        run: |
-          # Create a combined zip with all binaries
-          zip -r cicd-guard-all-platforms.zip dist/
-          
-          # Also create individual packages for easy access
-          cp dist/*.zip ./
-          cp dist/*.tar.gz ./
-          
-          echo "Available packages:"
-          ls -la *.zip *.tar.gz
-
-      - name: Upload combined package
-        uses: actions/upload-artifact@v4
-        with:
-          name: cicd-guard-all-platforms
-          path: |
-            cicd-guard-all-platforms.zip
-            *.zip
-            *.tar.gz
-          retention-days: 30
-
-      - name: Show download instructions
-        run: |
-          echo "=========================================="
-          echo "🚀 Build Complete! Download your binaries:"
-          echo "=========================================="
-          echo ""
-          echo " Combined package (all platforms):"
-          echo "   cicd-guard-all-platforms.zip"
-          echo ""
-          echo "🖥️  Individual packages:"
-          echo "   Windows: cicd-guard-windows-amd64.zip"
-          echo "   Linux AMD64: cicd-guard-linux-amd64.tar.gz"
-          echo "   Linux ARM64: cicd-guard-linux-arm64.tar.gz"
-          echo "   macOS Intel: cicd-guard-darwin-amd64.tar.gz"
-          echo "   macOS Apple Silicon: cicd-guard-darwin-arm64.tar.gz"
-          echo ""
-          echo "💡 Go to Actions → Build Multi-Platform Binaries → Artifacts"
-          echo "   to download your binaries!"
-          echo "=========================================="
+          retention-days: 15
