@@ -31,6 +31,13 @@ func runScan(cmd *cobra.Command, args []string) error {
 	// Create scanner
 	s := scanner.NewScanner()
 
+	// Load custom rules if specified
+	if rules != "" {
+		if err := s.LoadCustomRules(rules); err != nil {
+			return fmt.Errorf("failed to load custom rules: %w", err)
+		}
+	}
+
 	// Scan the specified path
 	findings, err := s.Scan(path)
 	if err != nil {

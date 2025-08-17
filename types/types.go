@@ -17,4 +17,19 @@ type Finding struct {
 	Line     int      `json:"line"`
 	Rule     string   `json:"rule"`
 	Context  string   `json:"context,omitempty"`
+	RuleID   string   `json:"rule_id,omitempty"`
+}
+
+// CustomRule represents a user-defined security rule
+type CustomRule struct {
+	ID          string   `yaml:"id"`
+	Pattern     string   `yaml:"pattern"`
+	Severity    Severity `yaml:"severity"`
+	Message     string   `yaml:"message"`
+	Description string   `yaml:"description,omitempty"`
+}
+
+// CustomRules represents a collection of user-defined rules
+type CustomRules struct {
+	Rules []CustomRule `yaml:"rules"`
 }

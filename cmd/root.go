@@ -10,6 +10,7 @@ var (
 	path     string
 	json     bool
 	severity string
+	rules    string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -40,4 +41,5 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&path, "path", "p", ".", "Path to scan (default: current directory)")
 	rootCmd.PersistentFlags().BoolVarP(&json, "json", "j", false, "Output results in JSON format")
 	rootCmd.PersistentFlags().StringVarP(&severity, "severity", "s", "", "Filter results by severity (HIGH, MEDIUM, LOW)")
+	rootCmd.PersistentFlags().StringVarP(&rules, "rules", "r", "", "Path to custom rules YAML file")
 }

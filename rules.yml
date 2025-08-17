@@ -1,0 +1,74 @@
+# Custom Security Rules for cicd-guard
+# Users can define their own regex-based security rules in this file
+# Use --rules flag to specify a custom rules file: cicd-guard scan --rules ./custom-rules.yml
+
+rules:
+  # Custom API Key Detection
+  - id: CUSTOM_API_KEY
+    pattern: "api_key=[A-Za-z0-9]{32}"
+    severity: HIGH
+    message: "Hardcoded API key detected"
+    description: "Detects hardcoded API keys in various formats"
+    
+  # Azure Key Vault Best Practice
+  - id: AZURE_KEYVAULT
+    pattern: "AZURE_KEYVAULT_URI"
+    severity: MEDIUM
+    message: "Consider using Azure Key Vault for secrets instead of inline values"
+    description: "Encourages use of Azure Key Vault for secret management"
+    
+  # Docker Registry Credentials
+  - id: DOCKER_REGISTRY_CREDS
+    pattern: "docker_registry_password\\s*=\\s*['\"][^'\"]+['\"]"
+    severity: HIGH
+    message: "Docker registry credentials found in plain text"
+    description: "Detects hardcoded Docker registry passwords"
+    
+  # Kubernetes Secrets in Plain Text
+  - id: K8S_SECRETS
+    pattern: "kubectl\\s+create\\s+secret\\s+generic\\s+[^\\s]+\\s+--from-literal"
+    severity: MEDIUM
+    message: "Kubernetes secrets created with --from-literal may expose sensitive data"
+    description: "Warns about potential exposure of secrets in kubectl commands"
+    
+  # Slack Webhook URLs
+  - id: SLACK_WEBHOOK
+    pattern: "https://hooks\\.slack\\.com/services/[A-Za-z0-9]+/[A-Za-z0-9]+/[A-Za-z0-9]+"
+    severity: MEDIUM
+    message: "Slack webhook URL detected - ensure this is not exposed publicly"
+    description: "Detects Slack webhook URLs that should be kept private"
+    
+  # JWT Tokens
+  - id: JWT_TOKEN
+    pattern: "eyJ[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*"
+    severity: HIGH
+    message: "JWT token detected - ensure this is not a production secret"
+    description: "Detects JWT tokens that might be hardcoded secrets"
+    
+  # Database Connection Strings
+  - id: DB_CONNECTION_STRING
+    pattern: "(mysql|postgresql|mongodb)://[^\\s]+:[^\\s]+@[^\\s]+"
+    severity: HIGH
+    message: "Database connection string with credentials detected"
+    description: "Detects database connection strings containing passwords"
+    
+  # AWS S3 Bucket Names
+  - id: AWS_S3_BUCKET
+    pattern: "s3://[a-z0-9.-]+"
+    severity: LOW
+    message: "AWS S3 bucket reference detected - ensure proper access controls"
+    description: "Detects S3 bucket references for access control review"
+    
+  # Git Credentials
+  - id: GIT_CREDENTIALS
+    pattern: "git\\s+clone\\s+https://[^\\s]+:[^\\s]+@[^\\s]+"
+    severity: HIGH
+    message: "Git clone with credentials detected - use SSH keys or tokens instead"
+    description: "Detects Git clone commands with embedded credentials"
+    
+  # Environment Variable Dumps
+  - id: ENV_DUMP
+    pattern: "echo\\s+\\$\\{?[A-Z_]+\\}?"
+    severity: MEDIUM
+    message: "Environment variable echo detected - may expose sensitive data"
+    description: "Warns about potential exposure of environment variables"

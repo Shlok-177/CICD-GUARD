@@ -23,6 +23,11 @@ func NewScanner() *Scanner {
 	}
 }
 
+// LoadCustomRules loads custom rules from a YAML file
+func (s *Scanner) LoadCustomRules(rulesFile string) error {
+	return s.rules.LoadCustomRules(rulesFile)
+}
+
 // Scan scans the specified path for CI/CD pipeline files
 func (s *Scanner) Scan(path string) (*Findings, error) {
 	findings := NewFindings()
