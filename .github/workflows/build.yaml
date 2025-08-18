@@ -2,9 +2,9 @@ name: Build Multi-Platform Binaries
 
 on:
   push:
-    branches: [ main ]
+    branches: [ release-* ]
   pull_request:
-    branches: [ main ]
+    branches: [ release-* ]
   workflow_dispatch:  # Allow manual triggering
 
 jobs:
