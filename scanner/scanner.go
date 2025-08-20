@@ -2,10 +2,7 @@ package scanner
 
 import (
 	"fmt"
-	"io/fs"
 	"os"
-	"path/filepath"
-	"strings"
 
 	"cicd-guard/rules"
 	"cicd-guard/types"
@@ -28,65 +25,41 @@ func (s *Scanner) LoadCustomRules(rulesFile string) error {
 	return s.rules.LoadCustomRules(rulesFile)
 }
 
-// Scan scans the specified path for CI/CD pipeline files
-func (s *Scanner) Scan(path string) (*Findings, error) {
+// Scan scans the specified paths for CI/CD pipeline files
+func (s *Scanner) Scan(paths ...string) (*Findings, error) {
 	findings := NewFindings()
 
-	// Walk through the directory
-	err := filepath.WalkDir(path, func(filePath string, d fs.DirEntry, err error) error {
+	var allFiles []string
+	for _, p := range paths {
+		// If the path is a directory, discover pipeline files within it
+		info, err := os.Stat(p)
 		if err != nil {
-			return err
+			return nil, fmt.Errorf("failed to get file info for %s: %w", p, err)
 		}
-
-		// Skip directories
-		if d.IsDir() {
-			return nil
-		}
-
-		// Check if file is a supported CI/CD file
-		if s.isCICDFile(filePath) {
-			fileFindings, err := s.scanFile(filePath)
+		if info.IsDir() {
+			detected, err := DetectPipelineFiles(p)
 			if err != nil {
-				return fmt.Errorf("failed to scan %s: %w", filePath, err)
+				return nil, fmt.Errorf("failed to detect pipeline files in %s: %w", p, err)
 			}
-			findings.Add(fileFindings...)
+			allFiles = append(allFiles, detected...)
+		} else {
+			// If it's a file, just add it
+			allFiles = append(allFiles, p)
 		}
-
-		return nil
-	})
-
-	return findings, err
-}
-
-// isCICDFile checks if the file is a supported CI/CD configuration file
-func (s *Scanner) isCICDFile(path string) bool {
-	fileName := strings.ToLower(filepath.Base(path))
-	dir := strings.ToLower(filepath.Dir(path))
-
-	// Normalize path separators for cross-platform compatibility
-	dir = strings.ReplaceAll(dir, "\\", "/")
-
-	// GitHub Actions workflows
-	if strings.Contains(dir, ".github/workflows") && (strings.HasSuffix(fileName, ".yml") || strings.HasSuffix(fileName, ".yaml")) {
-		return true
 	}
 
-	// GitLab CI
-	if fileName == "gitlab-ci.yml" || fileName == "gitlab-ci.yaml" {
-		return true
+	// Scan each file
+	for _, file := range allFiles {
+		fileFindings, err := s.scanFile(file)
+		if err != nil {
+			// Log error and continue scanning other files
+			fmt.Printf("failed to scan %s: %v\n", file, err)
+			continue
+		}
+		findings.Add(fileFindings...)
 	}
 
-	// Jenkins
-	if fileName == "jenkinsfile" {
-		return true
-	}
-
-	// Azure Pipelines
-	if fileName == "azure-pipelines.yml" || fileName == "azure-pipelines.yaml" {
-		return true
-	}
-
-	return false
+	return findings, nil
 }
 
 // scanFile scans a single CI/CD file for issues
