@@ -10,11 +10,10 @@ A CLI tool to scan CI/CD pipeline configuration files for security issues, hardc
 
 ## ✨ Features
 
-- **Supported File Types**:
-  - GitHub Actions (`.github/workflows/*.yml`)
-  - GitLab CI (`gitlab-ci.yml`)
-  - Jenkins (`Jenkinsfile`)
-  - Azure Pipelines (`azure-pipelines.yml`)
+- **Flexible File Scanning**:
+  - Recursively scan directories for pipeline files.
+  - Scan single files.
+  - Automatically discovers `*.yml`, `*.yaml`, `Jenkinsfile`, and files with `pipeline` in their name.
 
 - **Security Checks**:
   - Hardcoded secrets (AWS keys, tokens, passwords)
@@ -50,11 +49,24 @@ go install github.com/Shlok-177/cicd-guard@latest
 ### Basic Usage
 
 ```bash
-# Scan current directory
+# Scan the current directory recursively (interactive mode)
+# This will list detected pipeline files and prompt for selection.
 ./cicd-guard scan
 
-# Scan specific path
-./cicd-guard scan --path .github/workflows
+# Scan all detected pipeline files automatically
+./cicd-guard scan --all
+
+# Scan a specific directory
+./cicd-guard scan --path ci/
+
+# Scan a single file
+./cicd-guard scan --path ci/build.yml
+
+# Exclude specific files by index (e.g., exclude the 2nd and 4th detected files)
+./cicd-guard scan --exclude 2,4
+
+# Exclude specific files by filename (e.g., exclude 'azure-ci/deploy.yaml' and 'gitlab/.gitlab-ci.yml')
+./cicd-guard scan --exclude azure-ci/deploy.yaml,gitlab/.gitlab-ci.yml
 
 # Output in JSON format
 ./cicd-guard scan --json
@@ -65,8 +77,8 @@ go install github.com/Shlok-177/cicd-guard@latest
 # Use custom rules
 ./cicd-guard scan --rules custom-rules.yml
 
-# Combine options
-./cicd-guard scan --path . --severity HIGH --json --rules rules.yml
+# Combine options (e.g., scan all files in a directory, exclude one, and output JSON)
+./cicd-guard scan --path . --all --exclude custom/ci-pipeline.yaml --json
 ```
 
 ## 📋 Example Output

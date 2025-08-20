@@ -49,11 +49,15 @@ rules:
 
 ## How does it work?
 
-1. **Point it at your project** - Tell it where to look
-2. **Load custom rules** - Use `--rules your-rules.yml` for custom checks
-3. **It scans automatically** - Checks all your CI/CD files with both built-in and custom rules
-4. **Get a clear report** - See exactly what's wrong and where
-5. **Fix the issues** - Address security problems before they become threats
+1.  **Point it at your project** - Tell it where to look.
+2.  **Choose your scan mode** -
+    *   **Interactive (default)**: If no flags are provided, `cicd-guard` will list all detected pipeline files and let you choose which ones to scan.
+    *   **Scan All**: Use the `--all` flag to automatically scan every detected pipeline file without prompts.
+    *   **Exclude Files**: Use the `--exclude` flag to skip specific files by their index in the list or by their filename.
+3.  **Load custom rules** - Use `--rules your-rules.yml` for custom checks.
+4.  **It scans automatically** - Checks all your selected CI/CD files with both built-in and custom rules.
+5.  **Get a clear report** - See exactly what's wrong and where.
+6.  **Fix the issues** - Address security problems before they become threats.
 
 ## What files does it check?
 
@@ -96,11 +100,20 @@ Context: Action: actions/checkout@main
 ## Simple usage
 
 ```bash
-# Check current directory with built-in rules
+# Interactive scan (lists files and prompts for selection)
 ./cicd-guard scan
 
-# Check specific folder
+# Scan all detected pipeline files automatically
+./cicd-guard scan --all
+
+# Scan a specific directory
 ./cicd-guard scan --path .github/workflows
+
+# Exclude files by index (e.g., exclude the 2nd and 4th detected files)
+./cicd-guard scan --exclude 2,4
+
+# Exclude files by filename (e.g., exclude 'azure-ci/deploy.yaml')
+./cicd-guard scan --exclude azure-ci/deploy.yaml
 
 # Use custom rules
 ./cicd-guard scan --rules my-security-rules.yml
@@ -111,8 +124,8 @@ Context: Action: actions/checkout@main
 # Only show high-severity issues
 ./cicd-guard scan --severity HIGH
 
-# Combine custom rules with other options
-./cicd-guard scan --rules rules.yml --severity HIGH --json
+# Combine options (e.g., scan all files in a directory, exclude one, and output JSON)
+./cicd-guard scan --path . --all --exclude custom/ci-pipeline.yaml --json
 ```
 
 ## Think of it as...
