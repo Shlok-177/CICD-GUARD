@@ -67,12 +67,12 @@ func (s *Scanner) isCICDFile(path string) bool {
 	dir = strings.ReplaceAll(dir, "\\", "/")
 
 	// GitHub Actions workflows
-	if strings.Contains(dir, ".github/workflows") && strings.HasSuffix(fileName, ".yml") {
+	if strings.Contains(dir, ".github/workflows") && (strings.HasSuffix(fileName, ".yml") || strings.HasSuffix(fileName, ".yaml")) {
 		return true
 	}
 
 	// GitLab CI
-	if fileName == "gitlab-ci.yml" {
+	if fileName == "gitlab-ci.yml" || fileName == "gitlab-ci.yaml" {
 		return true
 	}
 
@@ -82,7 +82,7 @@ func (s *Scanner) isCICDFile(path string) bool {
 	}
 
 	// Azure Pipelines
-	if fileName == "azure-pipelines.yml" {
+	if fileName == "azure-pipelines.yml" || fileName == "azure-pipelines.yaml" {
 		return true
 	}
 

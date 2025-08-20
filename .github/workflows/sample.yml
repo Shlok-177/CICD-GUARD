@@ -27,5 +27,5 @@ jobs:
         echo "SECRET_KEY=sk_test_1234567890abcdef"  # This should trigger a hardcoded secret warning
         echo "API_TOKEN=ghp_abcdef1234567890"       # This should trigger a hardcoded secret warning
         echo "Deploying with token: ${{ secrets.DEPLOY_TOKEN }}"  # This should trigger an exposed secret reference warning
-
+        "mysql://user123:pass456@localhost"
         
