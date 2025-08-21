@@ -70,12 +70,13 @@ func (f *Findings) OutputConsole() error {
 			color.Blue("[%s]", finding.Severity)
 		}
 
-		fmt.Printf(" %s found in %s", finding.Message, finding.File)
-		if finding.Line > 0 {
-			fmt.Printf(" (line %d)", finding.Line)
-		}
+		fmt.Printf(" %s (%s)", finding.Message, finding.RuleID)
+		fmt.Printf(" File: %s:%d", finding.File, finding.Line)
 		fmt.Println()
 
+		if finding.Rule != "" {
+			color.Cyan("   Rule: %s", finding.Rule)
+		}
 		if finding.Context != "" {
 			color.Cyan("   Context: %s", finding.Context)
 		}

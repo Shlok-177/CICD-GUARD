@@ -67,14 +67,16 @@ func ResetScanCommandFlags() {
 	allFiles = false
 	excludeFiles = []string{}
 	// Reset cobra flags explicitly
-	scanCmd.Flags().Set("all", "false")
-	scanCmd.Flags().Set("exclude", "")
-	// Reset the path flag from rootCmd as well, as it's a persistent flag
-	rootCmd.Flags().Set("path", "")
-	// Also reset the command itself to clear any internal state
-	scanCmd.ResetFlags()
-	rootCmd.ResetFlags()
-	// Re-add flags to scanCmd after resetting
+	scanCmd.ResetFlags() // Reset scanCmd specific flags
+	rootCmd.ResetFlags() // Reset rootCmd and its persistent flags
+
+	// Re-initialize persistent flags for rootCmd
+	rootCmd.PersistentFlags().StringVarP(&path, "path", "p", ".", "Path to scan (default: current directory)")
+	rootCmd.PersistentFlags().BoolVarP(&json, "json", "j", false, "Output results in JSON format")
+	rootCmd.PersistentFlags().StringVarP(&severity, "severity", "s", "", "Filter results by severity (HIGH, MEDIUM, LOW)")
+	rootCmd.PersistentFlags().StringVarP(&rules, "rules", "r", "", "Path to custom rules YAML file")
+
+	// Re-add scanCmd specific flags
 	scanCmd.Flags().BoolVar(&allFiles, "all", false, "Scan all detected pipeline files automatically")
 	scanCmd.Flags().StringSliceVar(&excludeFiles, "exclude", []string{}, "Comma-separated list of file indices or filenames to exclude")
 }
