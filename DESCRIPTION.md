@@ -68,6 +68,7 @@ rules:
 - **Any file you specify** with custom rules
 
 ## Example output
+```
 🚨 Found 4 security issues:
 [HIGH] Hardcoded API key detected found in .github/workflows/deploy.yml (line 27)
 Context: echo "SECRET_KEY=sk_test_1234567890abcdef"
@@ -77,7 +78,7 @@ Context: echo "API_TOKEN=ghp_abcdef1234567890"
 Context: Deploying with token: ${{ secrets.DEPLOY_TOKEN }}
 [MEDIUM] Unpinned action detected - consider using a specific version or SHA
 Context: Action: actions/checkout@main
-
+```
 
 ## Who should use it?
 
@@ -132,7 +133,7 @@ Context: Action: actions/checkout@main
 
 A security scanner that automatically reviews your CI/CD setup and says "Hey, I found some security problems you should fix!" - like having a security expert review your pipelines, but automated, always available, and **now customizable to your specific needs**.
 
-## �� What's New in v1.0.0
+## � What's New in v1.0.0
 
 - **Custom Rules Engine**: Define your own security rules in YAML
 - **Priority System**: Custom rules override built-in rules
