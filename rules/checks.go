@@ -191,3 +191,97 @@ func checkJenkinsPlaintextCredentials(content string, lineNum int, line string) 
 		},
 	}
 }
+
+// checkGitHubPullRequestTargetPermissions checks for pull_request_target without explicit permissions
+func checkGitHubPullRequestTargetPermissions(content string, lineNum int, line string) []types.Finding {
+	lines := strings.Split(content, "\n")
+	if lineNum < 1 || lineNum > len(lines) {
+		return nil
+	}
+
+	// Find the start of the 'on: pull_request_target:' block
+	// This check assumes the regex in engine.go has already matched 'pull_request_target'.
+	// We need to look for 'permissions:' within the scope of this trigger.
+
+	// Find the indentation of the 'pull_request_target' line
+	targetLineIdx := lineNum - 1
+	targetIndentation := len(lines[targetLineIdx]) - len(strings.TrimLeft(lines[targetLineIdx], " "))
+
+	foundPermissions := false
+	// Look for 'permissions:' in subsequent lines at a higher indentation
+	for i := targetLineIdx + 1; i < len(lines); i++ {
+		currentLine := lines[i]
+		trimmedLine := strings.TrimSpace(currentLine)
+		if trimmedLine == "" {
+			continue
+		}
+
+		indentation := len(currentLine) - len(strings.TrimLeft(currentLine, " "))
+
+		if indentation <= targetIndentation && !strings.HasPrefix(trimmedLine, "#") {
+			// We've moved out of the 'pull_request_target' block or to a sibling/parent key
+			break
+		}
+
+		if strings.HasPrefix(trimmedLine, "permissions:") {
+			foundPermissions = true
+			break
+		}
+	}
+
+	if !foundPermissions {
+		return []types.Finding{
+			{
+				Severity: types.SeverityHigh,
+				Message:  "GitHub Actions 'pull_request_target' without explicit permissions",
+				Context:  strings.TrimSpace(lines[targetLineIdx]),
+			},
+		}
+	}
+	return nil
+}
+
+// checkJenkinsInputWithoutTimeout checks for Jenkins 'input' steps without a timeout
+func checkJenkinsInputWithoutTimeout(content string, lineNum int, line string) []types.Finding {
+	lines := strings.Split(content, "\n")
+	if lineNum < 1 || lineNum > len(lines) {
+		return nil
+	}
+
+	// Find the start of the 'input' step block
+	inputLineIdx := lineNum - 1
+	inputIndentation := len(lines[inputLineIdx]) - len(strings.TrimLeft(lines[inputLineIdx], " "))
+
+	foundTimeout := false
+	// Look for 'timeout:' in subsequent lines within the 'input' block
+	for i := inputLineIdx + 1; i < len(lines); i++ {
+		currentLine := lines[i]
+		trimmedLine := strings.TrimSpace(currentLine)
+		if trimmedLine == "" {
+			continue
+		}
+
+		indentation := len(currentLine) - len(strings.TrimLeft(currentLine, " "))
+
+		if indentation <= inputIndentation && !strings.HasPrefix(trimmedLine, "#") {
+			// We've moved out of the 'input' block or to a sibling/parent key
+			break
+		}
+
+		if strings.HasPrefix(trimmedLine, "timeout:") {
+			foundTimeout = true
+			break
+		}
+	}
+
+	if !foundTimeout {
+		return []types.Finding{
+			{
+				Severity: types.SeverityMedium,
+				Message:  "Jenkins 'input' step without timeout",
+				Context:  strings.TrimSpace(lines[inputLineIdx]),
+			},
+		}
+	}
+	return nil
+}

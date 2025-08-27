@@ -264,6 +264,52 @@ func (e *Engine) registerBuiltinRules() {
 			RuleID:      "EXPOSED_SECRET_REF",
 			AppliesTo:   []utils.Platform{utils.PlatformAll},
 		},
+		// New Rules added
+		{
+			Name:        "SSH Private Key",
+			Description: "Detects SSH private keys",
+			Severity:    types.SeverityHigh,
+			Pattern:     regexp.MustCompile(`-----BEGIN (RSA|DSA|EC|OPENSSH) PRIVATE KEY-----`),
+			Check:       checkGenericSecret,
+			RuleID:      "SEC005",
+			AppliesTo:   []utils.Platform{utils.PlatformAll},
+		},
+		{
+			Name:        "GitHub Actions Pull Request Target without Permissions",
+			Description: "Warns if 'pull_request_target' trigger is used without explicitly limiting permissions.",
+			Severity:    types.SeverityHigh,
+			Pattern:     regexp.MustCompile(`on:\s*pull_request_target:`),
+			Check:       checkGitHubPullRequestTargetPermissions,
+			RuleID:      "GH003",
+			AppliesTo:   []utils.Platform{utils.PlatformGitHub},
+		},
+		{
+			Name:        "GitLab CI Allow Failure True",
+			Description: "Warns if 'allow_failure: true' is set, which can hide critical security scan failures.",
+			Severity:    types.SeverityMedium,
+			Pattern:     regexp.MustCompile(`allow_failure:\s*true`),
+			Check:       checkGenericMisconfiguration,
+			RuleID:      "GL003",
+			AppliesTo:   []utils.Platform{utils.PlatformGitLab},
+		},
+		{
+			Name:        "Azure Pipelines Allow Scripts To Access OAuth Token",
+			Description: "Detects 'allowScriptsToAccessOAuthToken: true', which can lead to token exposure.",
+			Severity:    types.SeverityHigh,
+			Pattern:     regexp.MustCompile(`allowScriptsToAccessOAuthToken:\s*true`),
+			Check:       checkGenericMisconfiguration,
+			RuleID:      "AZ003",
+			AppliesTo:   []utils.Platform{utils.PlatformAzure},
+		},
+		{
+			Name:        "Jenkins Input Step Without Timeout",
+			Description: "Warns on 'input' steps in Jenkins pipelines without a defined timeout.",
+			Severity:    types.SeverityMedium,
+			Pattern:     regexp.MustCompile(`input\s*\{`),
+			Check:       checkJenkinsInputWithoutTimeout,
+			RuleID:      "JK003",
+			AppliesTo:   []utils.Platform{utils.PlatformJenkins},
+		},
 	}
 
 	// Deduplicate by RuleID
