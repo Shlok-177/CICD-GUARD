@@ -112,6 +112,7 @@ func (e *Engine) RunRules(filePath, content string) []types.Finding {
 						ruleFindings[i].Line = lineNum
 						ruleFindings[i].Rule = rule.Name
 						ruleFindings[i].RuleID = rule.RuleID
+						ruleFindings[i].Severity = rule.Severity // Set severity from rule definition
 					}
 					findings = append(findings, ruleFindings...)
 				}
@@ -144,6 +145,15 @@ func (e *Engine) registerBuiltinRules() {
 			Pattern:     regexp.MustCompile(`uses:\s*[^@\s]+@(main|master)`),
 			Check:       checkUnpinnedAction,
 			RuleID:      "UNPINNED_ACTION",
+			AppliesTo:   []utils.Platform{utils.PlatformGitHub},
+		},
+		{
+			Name:        "GitHub Actions Sudo Run",
+			Description: "Detects 'sudo' usage in GitHub Actions 'run' steps.",
+			Severity:    types.SeverityMedium,
+			Pattern:     regexp.MustCompile(`(?i)^\s*-\s*run:\s*sudo\s+`),
+			Check:       checkGitHubSudoRun,
+			RuleID:      "GH004",
 			AppliesTo:   []utils.Platform{utils.PlatformGitHub},
 		},
 
@@ -201,7 +211,7 @@ func (e *Engine) registerBuiltinRules() {
 			Name:        "Jenkins Hardcoded Password in Groovy",
 			Description: "Detects hardcoded passwords in Jenkins Groovy DSL",
 			Severity:    types.SeverityHigh,
-			Pattern:     regexp.MustCompile(`(?i)(def\s+\w+\s*=\s*['"](?:password|secret|token)[^'"]*['"]|env\.[A-Z_]+\s*=\s*['"](?:password|secret|token)[^'"]*['"])`),
+			Pattern:     regexp.MustCompile(`(?i)(def\s+(?:password|secret|token)\w*\s*=\s*['"][^'"]+['"]|env\.[A-Z_]*(?:PASSWORD|SECRET|TOKEN)[A-Z_]*\s*=\s*['"][^'"]+['"])`),
 			Check:       checkGenericSecret,
 			RuleID:      "JK002",
 			AppliesTo:   []utils.Platform{utils.PlatformJenkins},
@@ -293,6 +303,15 @@ func (e *Engine) registerBuiltinRules() {
 			AppliesTo:   []utils.Platform{utils.PlatformGitLab},
 		},
 		{
+			Name:        "GitLab CI Insecure Curl to Bash Pipe",
+			Description: "Detects insecure patterns like 'curl ... | bash' in GitLab CI scripts.",
+			Severity:    types.SeverityHigh,
+			Pattern:     regexp.MustCompile(`(?i)curl\s+.*\|\s*(bash|sh)`),
+			Check:       checkCurlToBash,
+			RuleID:      "GL004",
+			AppliesTo:   []utils.Platform{utils.PlatformGitLab},
+		},
+		{
 			Name:        "Azure Pipelines Allow Scripts To Access OAuth Token",
 			Description: "Detects 'allowScriptsToAccessOAuthToken: true', which can lead to token exposure.",
 			Severity:    types.SeverityHigh,
@@ -302,12 +321,30 @@ func (e *Engine) registerBuiltinRules() {
 			AppliesTo:   []utils.Platform{utils.PlatformAzure},
 		},
 		{
+			Name:        "Azure Pipelines System.AccessToken Usage",
+			Description: "Detects direct usage of System.AccessToken in Azure Pipelines scripts.",
+			Severity:    types.SeverityHigh,
+			Pattern:     regexp.MustCompile(`(?i)\$\(System\.AccessToken\)`),
+			Check:       checkAzureSystemAccessToken,
+			RuleID:      "AZ004",
+			AppliesTo:   []utils.Platform{utils.PlatformAzure},
+		},
+		{
 			Name:        "Jenkins Input Step Without Timeout",
 			Description: "Warns on 'input' steps in Jenkins pipelines without a defined timeout.",
 			Severity:    types.SeverityMedium,
 			Pattern:     regexp.MustCompile(`input\s*\{`),
 			Check:       checkJenkinsInputWithoutTimeout,
 			RuleID:      "JK003",
+			AppliesTo:   []utils.Platform{utils.PlatformJenkins},
+		},
+		{
+			Name:        "Jenkins Unsafe Shell Step",
+			Description: "Detects potentially unsafe shell steps (sh, bat) in Jenkins pipelines.",
+			Severity:    types.SeverityHigh,
+			Pattern:     regexp.MustCompile(`(?i)^\s*(sh|bat)\s+.*(?:(?:\$|\$\{)[A-Z_0-9]+|%[A-Z_0-9]+%).*`),
+			Check:       checkJenkinsUnsafeShellStep,
+			RuleID:      "JK004",
 			AppliesTo:   []utils.Platform{utils.PlatformJenkins},
 		},
 	}

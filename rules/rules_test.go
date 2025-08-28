@@ -232,6 +232,61 @@ func TestBuiltinRules(t *testing.T) {
 				{RuleID: "SEC001", Severity: types.SeverityHigh},
 			},
 		},
+		// New Rules Tests
+		{
+			name:     "GitLab CI Insecure Curl to Bash Pipe - Positive",
+			filePath: ".gitlab-ci.yml",
+			content:  "  script: curl -s example.com | bash",
+			expected: []types.Finding{{RuleID: "GL004", Severity: types.SeverityHigh}},
+		},
+		{
+			name:     "GitLab CI Insecure Curl to Bash Pipe - Negative",
+			filePath: ".gitlab-ci.yml",
+			content:  "  script: curl -s example.com",
+			expected: []types.Finding{},
+		},
+		{
+			name:     "GitHub Actions Sudo Run - Positive",
+			filePath: ".github/workflows/build.yml",
+			content:  "    - run: sudo apt-get update",
+			expected: []types.Finding{{RuleID: "GH004", Severity: types.SeverityMedium}},
+		},
+		{
+			name:     "GitHub Actions Sudo Run - Negative",
+			filePath: ".github/workflows/build.yml",
+			content:  "    - run: apt-get update",
+			expected: []types.Finding{},
+		},
+		{
+			name:     "Azure Pipelines System.AccessToken Usage - Positive",
+			filePath: "azure-pipelines.yml",
+			content:  "  script: echo $(System.AccessToken)",
+			expected: []types.Finding{{RuleID: "AZ004", Severity: types.SeverityHigh}},
+		},
+		{
+			name:     "Azure Pipelines System.AccessToken Usage - Negative",
+			filePath: "azure-pipelines.yml",
+			content:  "  script: echo $(Build.DefinitionName)",
+			expected: []types.Finding{},
+		},
+		{
+			name:     "Jenkins Unsafe Shell Step - Positive (sh)",
+			filePath: "Jenkinsfile",
+			content:  `sh "echo $UNSAFE_VAR"`,
+			expected: []types.Finding{{RuleID: "JK004", Severity: types.SeverityHigh}},
+		},
+		{
+			name:     "Jenkins Unsafe Shell Step - Positive (bat)",
+			filePath: "Jenkinsfile",
+			content:  `bat "echo %UNSAFE_VAR%"`,
+			expected: []types.Finding{{RuleID: "JK004", Severity: types.SeverityHigh}},
+		},
+		{
+			name:     "Jenkins Unsafe Shell Step - Negative",
+			filePath: "Jenkinsfile",
+			content:  `sh "echo 'safe string'"`,
+			expected: []types.Finding{},
+		},
 	}
 
 	for _, tt := range tests {

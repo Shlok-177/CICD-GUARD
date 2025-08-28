@@ -285,3 +285,47 @@ func checkJenkinsInputWithoutTimeout(content string, lineNum int, line string) [
 	}
 	return nil
 }
+
+// checkCurlToBash checks for insecure curl to bash pipes
+func checkCurlToBash(content string, lineNum int, line string) []types.Finding {
+	return []types.Finding{
+		{
+			Severity: types.SeverityHigh,
+			Message:  "Insecure curl to bash pipe detected",
+			Context:  strings.TrimSpace(line),
+		},
+	}
+}
+
+// checkGitHubSudoRun checks for 'sudo' in GitHub Actions 'run' steps
+func checkGitHubSudoRun(content string, lineNum int, line string) []types.Finding {
+	return []types.Finding{
+		{
+			Severity: types.SeverityMedium,
+			Message:  "GitHub Actions 'run' step uses 'sudo' - consider if elevated privileges are necessary",
+			Context:  strings.TrimSpace(line),
+		},
+	}
+}
+
+// checkAzureSystemAccessToken checks for direct usage of System.AccessToken in Azure Pipelines scripts
+func checkAzureSystemAccessToken(content string, lineNum int, line string) []types.Finding {
+	return []types.Finding{
+		{
+			Severity: types.SeverityHigh,
+			Message:  "Direct usage of System.AccessToken detected - consider using specific permissions or service connections",
+			Context:  strings.TrimSpace(line),
+		},
+	}
+}
+
+// checkJenkinsUnsafeShellStep checks for unsafe shell steps in Jenkins pipelines
+func checkJenkinsUnsafeShellStep(content string, lineNum int, line string) []types.Finding {
+	return []types.Finding{
+		{
+			Severity: types.SeverityHigh,
+			Message:  "Unsafe shell step detected - ensure proper sanitization of user-controlled input",
+			Context:  strings.TrimSpace(line),
+		},
+	}
+}

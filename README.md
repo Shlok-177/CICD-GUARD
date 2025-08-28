@@ -154,14 +154,33 @@ cicd-guard/
 ### Built-in Rules
 
 #### High Severity
-- **Hardcoded AWS Secret Key**: Detects AWS secret access keys in configuration
-- **Hardcoded AWS Access Key**: Detects AWS access key IDs in configuration
-- **Hardcoded API Token**: Detects API keys, tokens, and passwords
+- **Hardcoded AWS Secret Key**: Detects AWS secret access keys in configuration.
+- **Hardcoded AWS Access Key**: Detects AWS access key IDs in configuration.
+- **Hardcoded API Token**: Detects API keys, tokens, and passwords.
+- **SSH Private Key**: Detects SSH private keys.
+- **Azure Connection String**: Detects Azure connection strings.
+- **GitHub Token**: Detects GitHub tokens.
+- **Generic High-Entropy Secret**: Detects generic high-entropy secrets.
+- **Azure Pipelines Inline Secret**: Detects inline secrets in Azure Pipelines YAML.
+- **Jenkins Plaintext withCredentials**: Warns on 'withCredentials' using plaintext in Jenkins.
+- **Jenkins Hardcoded Password in Groovy**: Detects hardcoded passwords in Jenkins Groovy DSL.
+- **GitLab CI Insecure Curl to Bash Pipe**: Detects insecure patterns like 'curl ... | bash' in GitLab CI scripts.
+- **Azure Pipelines Allow Scripts To Access OAuth Token**: Detects 'allowScriptsToAccessOAuthToken: true', which can lead to token exposure.
+- **Azure Pipelines System.AccessToken Usage**: Detects direct usage of System.AccessToken in Azure Pipelines scripts.
+- **Jenkins Unsafe Shell Step**: Detects potentially unsafe shell steps (sh, bat) in Jenkins pipelines.
+- **GitHub Actions Write-All Permissions**: Warns if 'permissions: write-all' is used in GitHub Actions.
+- **GitHub Actions Pull Request Target without Permissions**: Warns if 'pull_request_target' trigger is used without explicitly limiting permissions.
 
 #### Medium Severity
-- **Unpinned GitHub Action**: Warns about actions using `@main` or `@master`
-- **Echo Secret**: Detects echo statements that might expose secrets
-- **Exposed Secret Reference**: Warns about echo statements with secret references
+- **Unpinned GitHub Action**: Warns about actions using `@main` or `@master`.
+- **Echo Secret**: Detects echo statements that might expose secrets.
+- **Exposed Secret Reference**: Warns about echo statements with secret references.
+- **GitLab CI Hardcoded Master Branch**: Warns if default branch is hardcoded as 'master' instead of 'main'.
+- **GitLab CI Job Without Only/Except**: Detects GitLab CI jobs without 'only/except' for insecure triggering.
+- **Azure Pipelines Unpinned VM Image**: Detects unpinned VM images in Azure Pipelines (e.g., 'windows-latest').
+- **GitLab CI Allow Failure True**: Warns if 'allow_failure: true' is set, which can hide critical security scan failures.
+- **Jenkins Input Step Without Timeout**: Warns on 'input' steps in Jenkins pipelines without a defined timeout.
+- **GitHub Actions Sudo Run**: Detects 'sudo' usage in GitHub Actions 'run' steps.
 
 ### Custom Rules Examples
 
