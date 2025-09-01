@@ -52,7 +52,7 @@ type Rule struct {
 	Description string
 	Severity    types.Severity
 	Pattern     *regexp.Regexp
-	Check       func(content string, lineNum int, line string) []types.Finding
+	Check       func(filePath string, content string, lineNum int, line string) []types.Finding
 	RuleID      string
 	AppliesTo   []utils.Platform
 }
@@ -106,13 +106,15 @@ func (e *Engine) RunRules(filePath, content string) []types.Finding {
 				}
 
 				if applies && rule.Pattern.MatchString(line) {
-					ruleFindings := rule.Check(content, lineNum, line)
+					ruleFindings := rule.Check(filePath, content, lineNum, line)
 					for i := range ruleFindings {
 						ruleFindings[i].File = filePath
 						ruleFindings[i].Line = lineNum
 						ruleFindings[i].Rule = rule.Name
 						ruleFindings[i].RuleID = rule.RuleID
-						ruleFindings[i].Severity = rule.Severity // Set severity from rule definition
+						if ruleFindings[i].Severity == "" {
+							ruleFindings[i].Severity = rule.Severity
+						}
 					}
 					findings = append(findings, ruleFindings...)
 				}

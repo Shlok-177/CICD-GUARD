@@ -11,12 +11,14 @@ import (
 // Scanner scans CI/CD pipeline files for security issues
 type Scanner struct {
 	rules *rules.Engine
+	ig    *IgnoreManager
 }
 
 // NewScanner creates a new scanner instance
 func NewScanner() *Scanner {
 	return &Scanner{
 		rules: rules.NewEngine(),
+		ig:    LoadIgnore("."),
 	}
 }
 
@@ -50,13 +52,21 @@ func (s *Scanner) Scan(paths ...string) (*Findings, error) {
 
 	// Scan each file
 	for _, file := range allFiles {
+		if s.ig != nil && s.ig.ShouldIgnoreFile(file) {
+			continue
+		}
 		fileFindings, err := s.scanFile(file)
 		if err != nil {
 			// Log error and continue scanning other files
 			fmt.Printf("failed to scan %s: %v\n", file, err)
 			continue
 		}
-		findings.Add(fileFindings...)
+		for _, f := range fileFindings {
+			if s.ig != nil && s.ig.ShouldIgnoreLine(f.Context) {
+				continue
+			}
+			findings.Add(f)
+		}
 	}
 
 	return findings, nil

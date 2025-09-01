@@ -5,36 +5,34 @@ import (
 	"regexp"
 	"strings"
 
+	"cicd-guard/detector"
 	"cicd-guard/types"
 )
 
 // checkHardcodedSecret checks for hardcoded secrets
-func checkHardcodedSecret(content string, lineNum int, line string) []types.Finding {
+func checkHardcodedSecret(filePath string, content string, lineNum int, line string) []types.Finding {
 	// Extract the secret value for context
 	secretMatch := regexp.MustCompile(`['"]([^'"]+)['"]`)
 	matches := secretMatch.FindStringSubmatch(line)
 
-	context := ""
+	secretValue := ""
 	if len(matches) > 1 {
-		secret := matches[1]
-		if len(secret) > 10 {
-			context = secret[:10] + "..."
-		} else {
-			context = secret
-		}
+		secretValue = matches[1]
 	}
 
-	return []types.Finding{
-		{
-			Severity: types.SeverityHigh,
-			Message:  "Hardcoded secret detected",
-			Context:  context,
-		},
+	d := detector.NewContextAwareDetector(4.0)
+	finding := d.Evaluate(filePath, content, lineNum, line, secretValue, false)
+	if finding == nil {
+		return nil
 	}
+	if finding.Message == "" {
+		finding.Message = "Hardcoded secret detected"
+	}
+	return []types.Finding{*finding}
 }
 
 // checkUnpinnedAction checks for unpinned GitHub Actions
-func checkUnpinnedAction(content string, lineNum int, line string) []types.Finding {
+func checkUnpinnedAction(filePath string, content string, lineNum int, line string) []types.Finding {
 	// Extract the action name for context
 	actionMatch := regexp.MustCompile(`uses:\s*([^@\s]+)@(main|master)`)
 	matches := actionMatch.FindStringSubmatch(line)
@@ -54,7 +52,7 @@ func checkUnpinnedAction(content string, lineNum int, line string) []types.Findi
 }
 
 // checkEchoSecret checks for echo statements that might expose secrets
-func checkEchoSecret(content string, lineNum int, line string) []types.Finding {
+func checkEchoSecret(filePath string, content string, lineNum int, line string) []types.Finding {
 	return []types.Finding{
 		{
 			Severity: types.SeverityMedium,
@@ -65,7 +63,7 @@ func checkEchoSecret(content string, lineNum int, line string) []types.Finding {
 }
 
 // checkExposedSecretReference checks for exposed secret references
-func checkExposedSecretReference(content string, lineNum int, line string) []types.Finding {
+func checkExposedSecretReference(filePath string, content string, lineNum int, line string) []types.Finding {
 	return []types.Finding{
 		{
 			Severity: types.SeverityMedium,
@@ -76,34 +74,38 @@ func checkExposedSecretReference(content string, lineNum int, line string) []typ
 }
 
 // checkGenericSecret extracts the matched secret for context
-func checkGenericSecret(content string, lineNum int, line string) []types.Finding {
-	// This function is called when a specific secret pattern is matched by the rule's regex.
-	// The 'line' itself is the context.
-	return []types.Finding{
-		{
-			Severity: types.SeverityHigh, // Severity is set by the rule definition in engine.go
-			Message:  "Secret detected",
-			Context:  strings.TrimSpace(line),
-		},
+func checkGenericSecret(filePath string, content string, lineNum int, line string) []types.Finding {
+	// Use context-aware detector to decide severity and ignore false positives
+	d := detector.NewContextAwareDetector(4.0)
+	// Extract a likely secret-like token
+	candidate := extractCandidateToken(line)
+	finding := d.Evaluate(filePath, content, lineNum, line, candidate, false)
+	if finding == nil {
+		return nil
 	}
+	if finding.Message == "" {
+		finding.Message = "Secret detected"
+	}
+	return []types.Finding{*finding}
 }
 
 // checkHighEntropySecret checks for generic high-entropy secrets
-func checkHighEntropySecret(content string, lineNum int, line string) []types.Finding {
-	// The regex in engine.go already filters for length.
-	// Additional entropy checks could be added here if needed, but for now,
-	// just report the line as context.
-	return []types.Finding{
-		{
-			Severity: types.SeverityHigh,
-			Message:  "High-entropy string detected - potential secret",
-			Context:  strings.TrimSpace(line),
-		},
+func checkHighEntropySecret(filePath string, content string, lineNum int, line string) []types.Finding {
+	// Evaluate with entropy and context awareness
+	d := detector.NewContextAwareDetector(4.0)
+	candidate := extractCandidateToken(line)
+	finding := d.Evaluate(filePath, content, lineNum, line, candidate, true)
+	if finding == nil {
+		return nil
 	}
+	if finding.Message == "" {
+		finding.Message = "High-entropy string detected - potential secret"
+	}
+	return []types.Finding{*finding}
 }
 
 // checkGenericMisconfiguration provides the line as context for misconfigurations
-func checkGenericMisconfiguration(content string, lineNum int, line string) []types.Finding {
+func checkGenericMisconfiguration(filePath string, content string, lineNum int, line string) []types.Finding {
 	return []types.Finding{
 		{
 			Severity: types.SeverityMedium, // Severity is set by the rule definition in engine.go
@@ -114,7 +116,7 @@ func checkGenericMisconfiguration(content string, lineNum int, line string) []ty
 }
 
 // checkGitLabInsecureTrigger checks for GitLab CI jobs without only/except
-func checkGitLabInsecureTrigger(content string, lineNum int, line string) []types.Finding {
+func checkGitLabInsecureTrigger(filePath string, content string, lineNum int, line string) []types.Finding {
 	lines := strings.Split(content, "\n")
 	if lineNum < 1 || lineNum > len(lines) {
 		return nil
@@ -180,7 +182,7 @@ func checkGitLabInsecureTrigger(content string, lineNum int, line string) []type
 }
 
 // checkJenkinsPlaintextCredentials checks for plaintext credentials in withCredentials
-func checkJenkinsPlaintextCredentials(content string, lineNum int, line string) []types.Finding {
+func checkJenkinsPlaintextCredentials(filePath string, content string, lineNum int, line string) []types.Finding {
 	// The regex in engine.go attempts to find specific patterns.
 	// This function provides the context.
 	return []types.Finding{
@@ -193,7 +195,7 @@ func checkJenkinsPlaintextCredentials(content string, lineNum int, line string) 
 }
 
 // checkGitHubPullRequestTargetPermissions checks for pull_request_target without explicit permissions
-func checkGitHubPullRequestTargetPermissions(content string, lineNum int, line string) []types.Finding {
+func checkGitHubPullRequestTargetPermissions(filePath string, content string, lineNum int, line string) []types.Finding {
 	lines := strings.Split(content, "\n")
 	if lineNum < 1 || lineNum > len(lines) {
 		return nil
@@ -242,7 +244,7 @@ func checkGitHubPullRequestTargetPermissions(content string, lineNum int, line s
 }
 
 // checkJenkinsInputWithoutTimeout checks for Jenkins 'input' steps without a timeout
-func checkJenkinsInputWithoutTimeout(content string, lineNum int, line string) []types.Finding {
+func checkJenkinsInputWithoutTimeout(filePath string, content string, lineNum int, line string) []types.Finding {
 	lines := strings.Split(content, "\n")
 	if lineNum < 1 || lineNum > len(lines) {
 		return nil
@@ -287,7 +289,7 @@ func checkJenkinsInputWithoutTimeout(content string, lineNum int, line string) [
 }
 
 // checkCurlToBash checks for insecure curl to bash pipes
-func checkCurlToBash(content string, lineNum int, line string) []types.Finding {
+func checkCurlToBash(filePath string, content string, lineNum int, line string) []types.Finding {
 	return []types.Finding{
 		{
 			Severity: types.SeverityHigh,
@@ -298,7 +300,7 @@ func checkCurlToBash(content string, lineNum int, line string) []types.Finding {
 }
 
 // checkGitHubSudoRun checks for 'sudo' in GitHub Actions 'run' steps
-func checkGitHubSudoRun(content string, lineNum int, line string) []types.Finding {
+func checkGitHubSudoRun(filePath string, content string, lineNum int, line string) []types.Finding {
 	return []types.Finding{
 		{
 			Severity: types.SeverityMedium,
@@ -309,7 +311,7 @@ func checkGitHubSudoRun(content string, lineNum int, line string) []types.Findin
 }
 
 // checkAzureSystemAccessToken checks for direct usage of System.AccessToken in Azure Pipelines scripts
-func checkAzureSystemAccessToken(content string, lineNum int, line string) []types.Finding {
+func checkAzureSystemAccessToken(filePath string, content string, lineNum int, line string) []types.Finding {
 	return []types.Finding{
 		{
 			Severity: types.SeverityHigh,
@@ -320,7 +322,7 @@ func checkAzureSystemAccessToken(content string, lineNum int, line string) []typ
 }
 
 // checkJenkinsUnsafeShellStep checks for unsafe shell steps in Jenkins pipelines
-func checkJenkinsUnsafeShellStep(content string, lineNum int, line string) []types.Finding {
+func checkJenkinsUnsafeShellStep(filePath string, content string, lineNum int, line string) []types.Finding {
 	return []types.Finding{
 		{
 			Severity: types.SeverityHigh,
@@ -328,4 +330,25 @@ func checkJenkinsUnsafeShellStep(content string, lineNum int, line string) []typ
 			Context:  strings.TrimSpace(line),
 		},
 	}
+}
+
+// extractCandidateToken tries to pull out a secret-like token for entropy analysis.
+func extractCandidateToken(line string) string {
+	trimmed := strings.TrimSpace(line)
+	// Prefer quoted content of reasonable length
+	if m := regexp.MustCompile(`['\"]([A-Za-z0-9_\-\+/=]{8,})['\"]`).FindStringSubmatch(line); len(m) > 1 {
+		return m[1]
+	}
+	// Otherwise take the longest plausible token (20+)
+	tokens := regexp.MustCompile(`[A-Za-z0-9_\-\+/=]{20,}`).FindAllString(trimmed, -1)
+	longest := ""
+	for _, t := range tokens {
+		if len(t) > len(longest) {
+			longest = t
+		}
+	}
+	if longest != "" {
+		return longest
+	}
+	return trimmed
 }
