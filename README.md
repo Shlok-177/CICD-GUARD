@@ -28,10 +28,10 @@ A CLI tool to scan CI/CD pipeline configuration files for security issues, hardc
   - Support for custom severity levels and messages
 
 - **🚀 NEW in v1.0.1 - Context-Aware Secret Detection**:
-- Detects real secrets like AWS keys, tokens, and credentials
-- Reduces false positives by ignoring test values, comments, and non-sensitive strings
-- Supports `.cicd-guard-ignore` for excluding files
-- New flag: `--secrets-only` to run secret scanning exclusively
+  - Detects real secrets like AWS keys, tokens, and credentials
+  - Reduces false positives by ignoring test values, comments, and non-sensitive strings    
+  - Supports `.cicd-guard-ignore` for excluding files
+  - New flag: `--secrets-only` to run secret scanning exclusively
 
 ## 🚀 Quick Start
 
