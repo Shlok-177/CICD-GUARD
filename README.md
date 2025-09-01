@@ -21,11 +21,17 @@ A CLI tool to scan CI/CD pipeline configuration files for security issues, hardc
   - Echo statements that might expose secrets
   - Incorrect secret references
 
-- **🚀 NEW in v1.0.0 - Custom Rules Engine**:
+- **Custom Rules Engine**:
   - Define your own regex-based security rules in YAML
   - Custom rules take priority over built-in rules
   - Easy to extend and customize for your organization
   - Support for custom severity levels and messages
+
+- **🚀 NEW in v1.0.1 - Context-Aware Secret Detection**:
+- Detects real secrets like AWS keys, tokens, and credentials
+- Reduces false positives by ignoring test values, comments, and non-sensitive strings
+- Supports `.cicd-guard-ignore` for excluding files
+- New flag: `--secrets-only` to run secret scanning exclusively
 
 ## 🚀 Quick Start
 
@@ -76,6 +82,9 @@ go install github.com/Shlok-177/cicd-guard@latest
 
 # Use custom rules
 ./cicd-guard scan --rules custom-rules.yml
+
+# Run only secret detection
+./cicd-guard scan --secrets-only
 
 # Combine options (e.g., scan all files in a directory, exclude one, and output JSON)
 ./cicd-guard scan --path . --all --exclude custom/ci-pipeline.yaml --json
