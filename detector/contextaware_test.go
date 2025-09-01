@@ -1,6 +1,10 @@
 package detector
 
-import "testing"
+import (
+	"os"
+	"path/filepath"
+	"testing"
+)
 
 func TestEvaluate_AWSKey_Real(t *testing.T) {
 	d := NewContextAwareDetector(4.0)
@@ -35,5 +39,30 @@ func TestEvaluate_RandomLookingButNonSecret(t *testing.T) {
 	finding := d.Evaluate(file, content, 3, line, "abcdef123", true)
 	if finding != nil {
 		t.Fatalf("expected no finding for low-entropy string, got one: %+v", finding)
+	}
+}
+
+func TestIgnoreFileExcludesSecrets(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, ".cicd-guard-ignore"), []byte("file:secret.yml\n"), 0644); err != nil {
+		t.Fatalf("failed to write ignore file: %v", err)
+	}
+	secFile := filepath.Join(dir, "secret.yml")
+	content := "env:\n  AWS_ACCESS_KEY_ID: AKIAIOSFODNN7EXAMPLE\n"
+	if err := os.WriteFile(secFile, []byte(content), 0644); err != nil {
+		t.Fatalf("failed to write secret file: %v", err)
+	}
+
+	// Change to the test directory so the ignore file is found
+	originalDir, _ := os.Getwd()
+	defer os.Chdir(originalDir)
+	os.Chdir(dir)
+
+	findings, err := RunContextAwareSecrets([]string{secFile}, ScanOptions{EntropyThreshold: 4.0})
+	if err != nil {
+		t.Fatalf("run secrets failed: %v", err)
+	}
+	if len(findings) != 0 {
+		t.Fatalf("expected no findings due to ignore, got %d", len(findings))
 	}
 }

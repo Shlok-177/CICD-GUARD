@@ -65,6 +65,7 @@ func simulateInput(input string) *os.File {
 // ResetFlags resets the flags for the scanCmd
 func ResetScanCommandFlags() {
 	allFiles = false
+	secretsOnly = false
 	excludeFiles = []string{}
 	// Reset cobra flags explicitly
 	scanCmd.ResetFlags() // Reset scanCmd specific flags
@@ -78,6 +79,7 @@ func ResetScanCommandFlags() {
 
 	// Re-add scanCmd specific flags
 	scanCmd.Flags().BoolVar(&allFiles, "all", false, "Scan all detected pipeline files automatically")
+	scanCmd.Flags().BoolVar(&secretsOnly, "secrets-only", false, "Run only context-aware secret detection (skip other rules)")
 	scanCmd.Flags().StringSliceVar(&excludeFiles, "exclude", []string{}, "Comma-separated list of file indices or filenames to exclude")
 }
 
@@ -269,4 +271,32 @@ func TestScanCommandInteractiveMode(t *testing.T) {
 			t.Errorf("expected output to contain %q, got %q", expectedCancelMessage, output)
 		}
 	})
+}
+
+func TestScanSecretsOnlyFlag(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "test_scan_secrets_only")
+	if err != nil {
+		t.Fatalf("failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	file := filepath.Join(tmpDir, "pipeline.yml")
+	if err := os.WriteFile(file, []byte("env:\n  TOKEN: ghp_abcdefghijklmnopqrstuvwxyz0123456789abcd\n"), 0644); err != nil {
+		t.Fatalf("failed to create file: %v", err)
+	}
+
+	ResetScanCommandFlags()
+	oldArgs := os.Args
+	defer func() { os.Args = oldArgs }()
+	os.Args = []string{"cicd-guard", "scan", "--all", "--secrets-only", "--path", tmpDir}
+
+	output := captureOutput(func() {
+		if err := rootCmd.Execute(); err != nil {
+			t.Fatalf("scan command failed: %v", err)
+		}
+	})
+
+	if !strings.Contains(output, "🚨") && !strings.Contains(strings.ToLower(output), "secret") {
+		t.Errorf("expected secret findings in output, got: %s", output)
+	}
 }

@@ -138,5 +138,9 @@ func isTestDataFile(path string) bool {
 
 func looksLikeTestPath(path string) bool {
 	lower := strings.ToLower(path)
-	return strings.Contains(lower, "test") || strings.Contains(lower, "example") || strings.Contains(lower, "sample") || strings.Contains(lower, "fixture")
+	// Only ignore if it's clearly a test file, not just containing "test" in the name
+	return strings.Contains(lower, "/test/") || strings.Contains(lower, "\\test\\") ||
+		strings.Contains(lower, "_test.") || strings.Contains(lower, ".test.") ||
+		strings.Contains(lower, "example") || strings.Contains(lower, "sample") ||
+		strings.Contains(lower, "fixture") || strings.Contains(lower, "mock")
 }

@@ -1,4 +1,4 @@
-package scanner
+package ignore
 
 import (
 	"bufio"
@@ -7,15 +7,15 @@ import (
 	"strings"
 )
 
-// IgnoreManager loads and checks ignore patterns.
-type IgnoreManager struct {
+// Manager loads and checks ignore patterns.
+type Manager struct {
 	fileGlobs   []string
 	lineSubstrs []string
 }
 
-// LoadIgnore reads patterns from .cicd-guard-ignore in the provided root path, if present.
-func LoadIgnore(root string) *IgnoreManager {
-	ig := &IgnoreManager{}
+// Load reads patterns from .cicd-guard-ignore in the provided root path, if present.
+func Load(root string) *Manager {
+	ig := &Manager{}
 	path := filepath.Join(root, ".cicd-guard-ignore")
 	f, err := os.Open(path)
 	if err != nil {
@@ -42,7 +42,7 @@ func LoadIgnore(root string) *IgnoreManager {
 }
 
 // ShouldIgnoreFile returns true if the file matches any glob pattern.
-func (ig *IgnoreManager) ShouldIgnoreFile(path string) bool {
+func (ig *Manager) ShouldIgnoreFile(path string) bool {
 	for _, g := range ig.fileGlobs {
 		if ok, _ := filepath.Match(g, filepath.Base(path)); ok {
 			return true
@@ -55,7 +55,7 @@ func (ig *IgnoreManager) ShouldIgnoreFile(path string) bool {
 }
 
 // ShouldIgnoreLine returns true if the line contains any ignored substring.
-func (ig *IgnoreManager) ShouldIgnoreLine(line string) bool {
+func (ig *Manager) ShouldIgnoreLine(line string) bool {
 	for _, s := range ig.lineSubstrs {
 		if s != "" && strings.Contains(line, s) {
 			return true

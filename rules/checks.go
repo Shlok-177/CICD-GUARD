@@ -1,12 +1,11 @@
 package rules
 
 import (
+	"cicd-guard/detector"
+	"cicd-guard/types"
 	"fmt"
 	"regexp"
 	"strings"
-
-	"cicd-guard/detector"
-	"cicd-guard/types"
 )
 
 // checkHardcodedSecret checks for hardcoded secrets
@@ -28,6 +27,8 @@ func checkHardcodedSecret(filePath string, content string, lineNum int, line str
 	if finding.Message == "" {
 		finding.Message = "Hardcoded secret detected"
 	}
+	// Preserve the original rule severity (HIGH for hardcoded secrets)
+	finding.Severity = types.SeverityHigh
 	return []types.Finding{*finding}
 }
 
@@ -86,6 +87,8 @@ func checkGenericSecret(filePath string, content string, lineNum int, line strin
 	if finding.Message == "" {
 		finding.Message = "Secret detected"
 	}
+	// Preserve the original rule severity (HIGH for generic secrets)
+	finding.Severity = types.SeverityHigh
 	return []types.Finding{*finding}
 }
 
@@ -98,6 +101,8 @@ func checkHighEntropySecret(filePath string, content string, lineNum int, line s
 	if finding == nil {
 		return nil
 	}
+	// Preserve the original rule severity (HIGH for high-entropy secrets)
+	finding.Severity = types.SeverityHigh
 	if finding.Message == "" {
 		finding.Message = "High-entropy string detected - potential secret"
 	}
@@ -108,9 +113,9 @@ func checkHighEntropySecret(filePath string, content string, lineNum int, line s
 func checkGenericMisconfiguration(filePath string, content string, lineNum int, line string) []types.Finding {
 	return []types.Finding{
 		{
-			Severity: types.SeverityMedium, // Severity is set by the rule definition in engine.go
-			Message:  "Potential misconfiguration detected",
-			Context:  strings.TrimSpace(line),
+			// Severity is set by the rule definition in engine.go
+			Message: "Potential misconfiguration detected",
+			Context: strings.TrimSpace(line),
 		},
 	}
 }

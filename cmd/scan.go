@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bufio"
+	"cicd-guard/detector"
 	"cicd-guard/scanner"
 	"fmt"
 	"os"
@@ -13,6 +14,7 @@ import (
 
 var (
 	allFiles     bool
+	secretsOnly  bool
 	excludeFiles []string
 )
 
@@ -21,14 +23,15 @@ var scanCmd = &cobra.Command{
 	Use:   "scan",
 	Short: "Recursively scan a directory or a single file for security issues",
 	Long: `Recursively scans a given directory or a single file for security vulnerabilities,
-hardcoded secrets, and best practice violations.
-By default, it scans the current directory for *.yml, *.yaml, Jenkinsfile, and files with "pipeline" in their name.`,
+	including context-aware secret detection, hardcoded secrets, and best practice violations.
+	By default, it scans the current directory for *.yml, *.yaml, Jenkinsfile, and files with "pipeline" in their name.`,
 	RunE: runScan,
 }
 
 func init() {
 	rootCmd.AddCommand(scanCmd)
 	scanCmd.Flags().BoolVar(&allFiles, "all", false, "Scan all detected pipeline files automatically")
+	scanCmd.Flags().BoolVar(&secretsOnly, "secrets-only", false, "Run only context-aware secret detection (skip other rules)")
 	scanCmd.Flags().StringSliceVar(&excludeFiles, "exclude", []string{}, "Comma-separated list of file indices or filenames to exclude")
 }
 
@@ -92,6 +95,19 @@ func runScan(cmd *cobra.Command, args []string) error {
 	if len(filesToScan) == 0 {
 		fmt.Println("No files selected for scanning. Exiting.")
 		return nil
+	}
+
+	if secretsOnly {
+		findings, err := detector.RunContextAwareSecrets(filesToScan, detector.ScanOptions{EntropyThreshold: 4.0})
+		if err != nil {
+			return fmt.Errorf("secret scan failed: %w", err)
+		}
+		f := scanner.NewFindings()
+		f.Add(findings...)
+		if json {
+			return f.OutputJSON()
+		}
+		return f.OutputConsole()
 	}
 
 	// Create scanner

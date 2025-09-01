@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"cicd-guard/ignore"
 	"cicd-guard/rules"
 	"cicd-guard/types"
 )
@@ -11,14 +12,14 @@ import (
 // Scanner scans CI/CD pipeline files for security issues
 type Scanner struct {
 	rules *rules.Engine
-	ig    *IgnoreManager
+	ig    *ignore.Manager
 }
 
 // NewScanner creates a new scanner instance
 func NewScanner() *Scanner {
 	return &Scanner{
 		rules: rules.NewEngine(),
-		ig:    LoadIgnore("."),
+		ig:    ignore.Load("."),
 	}
 }
 
