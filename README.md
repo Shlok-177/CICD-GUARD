@@ -4,7 +4,7 @@ A CLI tool to scan CI/CD pipeline configuration files for security issues, hardc
 
 [![Go Version](https://img.shields.io/badge/Go-1.25+-blue.svg)](https://golang.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Release](https://img.shields.io/badge/Release-v1.0.0-green.svg)](https://github.com/Shlok-177/cicd-guard/releases)
+[![Release](https://img.shields.io/badge/Release-v1.0.1-green.svg)](https://github.com/Shlok-177/cicd-guard/releases)
 
 > **🔒 Secure your CI/CD pipelines with automated security scanning**
 

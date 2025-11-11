@@ -79,7 +79,6 @@ jobs:
         run: |
           echo "Building for ${{ matrix.goos }}/${{ matrix.goarch }}"
           
-          # echo "mysql://user123:pass456@localhost"
           go build -ldflags="-s -w" -o ${{ matrix.binary_name }} .
           
           # Make binary executable (for Unix systems)
