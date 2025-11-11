@@ -10,6 +10,16 @@ A CLI tool to scan CI/CD pipeline configuration files for security issues, hardc
 
 ## ✨ Features
 
+- **AI-Powered Pipeline Analysis**:
+  - Utilizes Gemini Pro API for intelligent logical and security analysis.
+  - Detects security vulnerabilities, logical errors, best practice violations, and provides optimization suggestions.
+  - Supports interactive file selection, file exclusion, and severity filtering.
+  - Outputs results in a user-friendly format or raw JSON.
+
+- **API Key Management**:
+  - Securely stores and manages Gemini API keys locally (`~/.cicd-guard/config.json`).
+  - Provides commands to set, remove, and check the status of the stored API key.
+
 - **Flexible File Scanning**:
   - Recursively scan directories for pipeline files.
   - Scan single files.
@@ -88,6 +98,51 @@ go install github.com/Shlok-177/cicd-guard@latest
 
 # Combine options (e.g., scan all files in a directory, exclude one, and output JSON)
 ./cicd-guard scan --path . --all --exclude custom/ci-pipeline.yaml --json
+```
+
+### AI Scan Usage
+
+```bash
+# Perform an AI-based scan (interactive mode)
+# This will list detected pipeline files and prompt for selection.
+./cicd-guard ai-scan
+
+# AI scan all detected pipeline files automatically
+./cicd-guard ai-scan --all
+
+# AI scan a specific directory
+./cicd-guard ai-scan --path ci/
+
+# AI scan a single file
+./cicd-guard ai-scan --path ci/build.yml
+
+# Exclude specific files from AI scan
+./cicd-guard ai-scan --exclude rules.yml,test.yml
+
+# Filter AI scan results by severity
+./cicd-guard ai-scan --severity HIGH
+
+# Output raw Gemini JSON response
+./cicd-guard ai-scan --json
+
+# Show verbose AI scan output (includes suggestions)
+./cicd-guard ai-scan --verbose
+
+# Combine options (e.g., AI scan all files, exclude one, filter by severity, and show verbose output)
+./cicd-guard ai-scan --all --exclude custom/ci-pipeline.yaml --severity MEDIUM --verbose
+```
+
+### Configuration Management
+
+```bash
+# Set or update your Gemini API key
+./cicd-guard config set-api-key
+
+# Check if a Gemini API key is currently stored
+./cicd-guard config show-api-key
+
+# Remove the stored Gemini API key
+./cicd-guard config remove-api-key
 ```
 
 ## 📋 Example Output

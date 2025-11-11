@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-11-11
+
+### Added
+- 🤖 **AI-Powered Pipeline Analysis**:
+  - New `ai-scan` command for intelligent logical and security analysis using Gemini Pro API.
+  - Detects security vulnerabilities, logical errors, best practice violations, and provides optimization suggestions.
+  - Supports interactive file selection, file exclusion (`--exclude`), and severity filtering (`--severity`).
+  - Outputs results in a user-friendly format or raw JSON (`--json`).
+  - Includes a `--verbose` flag for detailed suggestions.
+- 🔑 **API Key Management**:
+  - New `config` command with subcommands for managing Gemini API keys.
+  - `config set-api-key`: Securely sets/updates and validates the Gemini API key.
+  - `config remove-api-key`: Removes the stored Gemini API key.
+  - `config show-api-key`: Checks if an API key is stored.
+
 ## [1.0.0] - 2025-08-17
 
 ### Added

@@ -2,12 +2,13 @@
 
 ## What is cicd-guard?
 
-`cicd-guard` is a powerful command-line tool that helps developers and DevOps engineers find security problems in their CI/CD pipeline files before they become real security risks. **Now with a custom rules engine and context-aware secret detection!**
+`cicd-guard` is a powerful command-line tool that helps developers and DevOps engineers find security problems in their CI/CD pipeline files before they become real security risks. **Now with AI-powered analysis, a custom rules engine, and context-aware secret detection!**
 
 ## What does it do?
 
 Think of it as a security guard for your CI/CD pipelines. It automatically scans your pipeline configuration files and looks for common security mistakes like:
 
+* **AI-Powered Analysis**: Uses the Gemini Pro API to perform intelligent logical and security analysis, identifying complex issues beyond simple pattern matching.
 * **Hardcoded secrets** - When someone accidentally puts passwords, API keys, or tokens directly in the code
 * **Unpinned versions** - When GitHub Actions use `@main` instead of a specific version (which can be dangerous)
 * **Exposed secrets** - When pipeline scripts might accidentally show sensitive information
@@ -26,11 +27,36 @@ CI/CD pipelines often handle sensitive information like:
 
 If these get exposed, hackers could access your systems, databases, or cloud resources. `cicd-guard` catches these problems early, before they reach production.
 
+## 🚀 NEW: AI-Powered Pipeline Analysis
+
+### What's New in v1.1.0
+
+The latest release introduces **AI-Powered Pipeline Analysis** with the `ai-scan` command, which:
+
+*   Utilizes the **Gemini Pro API** for deep logical and security reasoning.
+*   Identifies **security vulnerabilities**, **logical errors**, **best practice violations**, and provides **optimization suggestions**.
+*   Supports **interactive file selection**, **file exclusion** (`--exclude`), and **severity filtering** (`--severity`).
+*   Offers **verbose output** (`--verbose`) for detailed suggestions.
+*   Includes **secure API key management** with `config set-api-key`, `config remove-api-key`, and `config show-api-key` commands.
+
+### Example
+
+```bash
+# Interactive AI scan
+./cicd-guard ai-scan
+
+# AI scan all files, filter by HIGH severity, and show verbose output
+./cicd-guard ai-scan --all --severity HIGH --verbose
+
+# Set your Gemini API key
+./cicd-guard config set-api-key
+```
+
 ## 🚀 NEW: Context-Aware Secret Detection
 
 ### What's New in v1.0.1
 
-The latest release introduces **Context-Aware Secret Detection**, which:
+The previous release introduced **Context-Aware Secret Detection**, which:
 
 * Looks at **how secrets are used**, not just patterns
 * Reduces **false positives** by checking surrounding code context
@@ -112,6 +138,7 @@ Context: Action: actions/checkout@main
 
 ## Key benefits
 
+✅ **AI-Powered Insights**: Get intelligent analysis for complex logical and security issues.
 ✅ **Easy to use** - Simple commands, clear output
 ✅ **Fast scanning** - Checks entire projects in seconds
 ✅ **Comprehensive** - Covers multiple CI/CD platforms
@@ -161,20 +188,26 @@ A security scanner that automatically reviews your CI/CD setup and says "Hey, I 
 
 ## 📝 What's New
 
+### v1.1.0
+
+*   **AI-Powered Pipeline Analysis**: New `ai-scan` command for intelligent logical and security analysis using Gemini Pro API.
+*   **API Key Management**: New `config` command with subcommands (`set-api-key`, `remove-api-key`, `show-api-key`) for secure API key handling.
+*   **Enhanced `ai-scan` Filtering**: Supports interactive file selection, file exclusion (`--exclude`), severity filtering (`--severity`), and verbose output (`--verbose`).
+
 ### v1.0.1
 
-* **Context-Aware Secret Detection**: Smarter secret scanning with reduced false positives
-* **New flag `--secrets-only`**: Scan only for secret-related issues
-* **Improved Documentation**: Updated README and usage examples
+*   **Context-Aware Secret Detection**: Smarter secret scanning with reduced false positives
+*   **New flag `--secrets-only`**: Scan only for secret-related issues
+*   **Improved Documentation**: Updated README and usage examples
 
 ### v1.0.0
 
-* **Custom Rules Engine**: Define your own security rules in YAML
-* **Priority System**: Custom rules override built-in rules
-* **Enhanced Examples**: More comprehensive rule examples
-* **Better Documentation**: Clear guides for custom rule creation
-* **Improved Testing**: Better test coverage and examples
+*   **Custom Rules Engine**: Define your own security rules in YAML
+*   **Priority System**: Custom rules override built-in rules
+*   **Enhanced Examples**: More comprehensive rule examples
+*   **Better Documentation**: Clear guides for custom rule creation
+*   **Improved Testing**: Better test coverage and examples
 
 ---
 
-**Bottom line**: `cicd-guard` helps you catch security mistakes in your CI/CD pipelines before they become security breaches. It's simple, fast, **highly customizable**, and now **context-aware for smarter detection**.
+**Bottom line**: `cicd-guard` helps you catch security mistakes in your CI/CD pipelines before they become security breaches. It's simple, fast, **highly customizable**, and now **smarter with AI-powered analysis and context-aware detection**.
