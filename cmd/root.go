@@ -8,7 +8,7 @@ var (
 	// Used for flags
 	cfgFile  string
 	path     string
-	json     bool
+	jsonFlag bool // Renamed from json to jsonFlag
 	severity string
 	rules    string
 )
@@ -39,7 +39,10 @@ func Execute() error {
 func init() {
 	// Global flags
 	rootCmd.PersistentFlags().StringVarP(&path, "path", "p", ".", "Path to scan (default: current directory)")
-	rootCmd.PersistentFlags().BoolVarP(&json, "json", "j", false, "Output results in JSON format")
+	rootCmd.PersistentFlags().BoolVarP(&jsonFlag, "json", "j", false, "Output results in JSON format")
 	rootCmd.PersistentFlags().StringVarP(&severity, "severity", "s", "", "Filter results by severity (HIGH, MEDIUM, LOW)")
 	rootCmd.PersistentFlags().StringVarP(&rules, "rules", "r", "", "Path to custom rules YAML file")
+
+	// Add aiScanCmd to rootCmd
+	rootCmd.AddCommand(aiScanCmd)
 }

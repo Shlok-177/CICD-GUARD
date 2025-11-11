@@ -73,7 +73,7 @@ func ResetScanCommandFlags() {
 
 	// Re-initialize persistent flags for rootCmd
 	rootCmd.PersistentFlags().StringVarP(&path, "path", "p", ".", "Path to scan (default: current directory)")
-	rootCmd.PersistentFlags().BoolVarP(&json, "json", "j", false, "Output results in JSON format")
+	rootCmd.PersistentFlags().BoolVarP(&jsonFlag, "json", "j", false, "Output results in JSON format")
 	rootCmd.PersistentFlags().StringVarP(&severity, "severity", "s", "", "Filter results by severity (HIGH, MEDIUM, LOW)")
 	rootCmd.PersistentFlags().StringVarP(&rules, "rules", "r", "", "Path to custom rules YAML file")
 

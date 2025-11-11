@@ -104,7 +104,7 @@ func runScan(cmd *cobra.Command, args []string) error {
 		}
 		f := scanner.NewFindings()
 		f.Add(findings...)
-		if json {
+		if jsonFlag {
 			return f.OutputJSON()
 		}
 		return f.OutputConsole()
@@ -132,7 +132,7 @@ func runScan(cmd *cobra.Command, args []string) error {
 	}
 
 	// Output results
-	if json {
+	if jsonFlag {
 		return findings.OutputJSON()
 	}
 
